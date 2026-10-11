@@ -2,7 +2,7 @@
 
 Turning the generated `next-enterprise` base into a reusable, **containerized**, **secured**, **deployable** application starter.
 
-> Status: planning. Nothing in this plan is implemented yet.
+> Status: Phase 1 (containerize) complete and verified. Phases 2+ not started.
 > Repo: `Mxvlasic/next-enterprise-starter` — **public**, marked as a GitHub **template**.
 
 ---
@@ -68,6 +68,12 @@ Long-term intent: an asset for internal BI work and, potentially, client/freelan
 
 ### Acceptance
 - Image builds reproducibly; size `< ~300 MB`; runs **non-root**; healthcheck healthy; `docker run -p 8080:8080` serves the app.
+
+**Done (verified):** image `next-enterprise-starter:p1` — **283 MB**, runs as `nextjs`
+(non-root), `HEALTHCHECK` reports `healthy`, `/api/health` → `{"status":"ok"}`,
+homepage 200. Runner stage is Alpine/musl; glibc duplicates excluded via
+`outputFileTracingExcludes` in `next.config.ts`. Verified with a local rootless
+Docker daemon (no Docker Desktop needed).
 
 ---
 

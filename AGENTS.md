@@ -15,10 +15,11 @@ Keep this file lean and point to versioned docs; do not duplicate them here.
 
 ## Current state
 
-- Base generated from `Blazity/next-enterprise`. **Planning only** — no Docker/deploy/security layer implemented yet.
+- Base generated from `Blazity/next-enterprise`. **P1 (Dockerize) done and verified** —
+  multi-stage Dockerfile (Debian build, Alpine runner, 283 MB, non-root, healthcheck).
 - Repo is **public** and marked as a GitHub **template**.
-- Phases: **P1 Dockerize** → P2 Deploy to Cloud Run (live URL) → P3 CI/CD → P4 security scanning → P5 optional K8s manifests → P6 strip/template-ize.
-- Next action: start **P1** (see `docs/PLAN.md` §3).
+- Phases: **P1 Dockerize ✅** → P2 Deploy to Cloud Run (live URL) → P3 CI/CD → P4 security scanning → P5 optional K8s manifests → P6 strip/template-ize.
+- Next action: start **P2** (see `docs/PLAN.md` §4). P2 needs a GCP project + domain.
 
 ## Project facts
 
@@ -41,7 +42,7 @@ Keep this file lean and point to versioned docs; do not duplicate them here.
 - Repo: **public**, marked as a **template**.
 - First deploy target: **Cloud Run** (serverless container). Listen on `$PORT`; build linux/amd64.
 - Kubernetes: **optional / portability-only** — manifests kept, not deployed.
-- Registry: **GHCR**. Manifests: **Kustomize**. Image base: Debian slim.
+- Registry: **GHCR**. Manifests: **Kustomize**. Image: Debian build stages, **Alpine runner**.
 - Security tooling may use free GHAS features (CodeQL, secret scanning, dependency review) now that the repo is public.
 
 ## Tooling available

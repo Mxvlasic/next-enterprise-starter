@@ -1,0 +1,36 @@
+# Local run of the production image (mirrors Cloud Run: $PORT, default 8080).
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: next-enterprise-starter:local
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      # Add runtime env here as needed, e.g.:
+      # NEXT_PUBLIC_SITE_URL: http://localhost:8080
+    restart: unless-stopped
+    healthcheck:
+      # node is present in the image; no curl needed.
+      test: ["CMD", "node", "-e", "fetch('http://localhost:'+(process.env.PORT||'8080')+'/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # --- Future services (stubbed) ---
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: app
+  #     POSTGRES_PASSWORD: app
+  #     POSTGRES_DB: app
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+# volumes:
+#   pgdata:

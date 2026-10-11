@@ -1,0 +1,29 @@
+# Keep the build context small and secret-free.
+node_modules
+.next
+out
+dist
+coverage
+
+.git
+.gitignore
+.github
+
+# Test / doc artifacts never needed inside the image.
+e2e
+playwright-report
+test-results
+storybook-static
+coverage
+
+# Local env files (never bake secrets into the image).
+.env*.local
+.env
+
+# Editor / OS noise.
+.vscode/*
+.idea
+.DS_Store
+*.log
+npm-debug.log*
+pnpm-debug.log*

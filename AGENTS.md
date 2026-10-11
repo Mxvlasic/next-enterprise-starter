@@ -9,8 +9,9 @@ Keep this file lean and point to versioned docs; do not duplicate them here.
 
 ## Read these first
 
-- `docs/PLAN.md` — full roadmap (workstreams, tasks, acceptance criteria, milestones).
-- `docs/DEPLOYMENT-OPTIONS.md` — deployment targets analysis and recommendation.
+- `docs/PLAN.md` — full roadmap (phases, tasks, acceptance criteria).
+- `docs/DEPLOYMENT-OPTIONS.md` — deployment targets analysis and locked decision.
+- `docs/CLONING.md` — public vs private cloning; how CI adapts to repo visibility.
 
 ## Current state
 
@@ -32,6 +33,7 @@ Keep this file lean and point to versioned docs; do not duplicate them here.
 - Any container must run **non-root** with a healthcheck on `/api/health`.
 - Keep deployment manifests **provider-neutral** (Kustomize; standard Deploy/Service/Ingress) so k3s → managed K8s → client cluster needs only a kubeconfig change.
 - Never commit plaintext secrets (Sealed Secrets / External Secrets).
+- CI must stay **visibility-aware**: GHAS-only jobs run only on public repos (or private with repo variable `ENABLE_GHAS=true`). Use `.github/actions/detect-visibility`; see `docs/CLONING.md`. A private clone must always build without GHAS.
 - Git identity is set to `Mxvlasic` with a GitHub noreply email — do not change it to a personal address.
 
 ## Decisions (locked — see docs/PLAN.md §0)

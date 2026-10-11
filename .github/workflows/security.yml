@@ -1,0 +1,81 @@
+name: Security
+
+# Visibility-aware security pipeline.
+#
+# A derived repository (public OR private) runs this automatically. The
+# `visibility` job detects the repository's visibility and the rest of the
+# pipeline enables GitHub Advanced Security features ONLY where they are
+# available:
+#   - public repo              -> full suite (CodeQL, dependency review)
+#   - private + GHAS + var      -> full suite (set repo variable ENABLE_GHAS=true)
+#   - private, no GHAS          -> GHAS jobs skipped; always-on scanners still run
+#
+# Plan-independent scanners (secret scanning) always run.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visibility:
+    name: Detect visibility
+    runs-on: ubuntu-latest
+    outputs:
+      visibility: ${{ steps.detect.outputs.visibility }}
+      ghas: ${{ steps.detect.outputs.ghas }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: detect
+        uses: ./.github/actions/detect-visibility
+        with:
+          # Set the repo variable ENABLE_GHAS=true (Settings -> Secrets and
+          # variables -> Actions -> Variables) if this private repo has GitHub
+          # Code Security and you want the full suite to run.
+          force_ghas: ${{ vars.ENABLE_GHAS }}
+
+  # --- GHAS-gated: run only when available (public, or opted-in private) -----
+
+  codeql:
+    name: CodeQL
+    needs: visibility
+    if: needs.visibility.outputs.ghas == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v3
+
+  dependency-review:
+    name: Dependency review
+    needs: visibility
+    if: needs.visibility.outputs.ghas == 'true' && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+
+  # --- Always-on: free and plan-independent ---------------------------------
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

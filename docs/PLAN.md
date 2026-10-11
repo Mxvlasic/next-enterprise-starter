@@ -108,6 +108,8 @@ Long-term intent: an asset for internal BI work and, potentially, client/freelan
 
 **Goal:** every PR is scanned; findings surface in the Security tab (now free, repo is public).
 
+> **Visibility-aware by design (already scaffolded).** The pipeline detects the derived repo's visibility at runtime via `.github/actions/detect-visibility` and runs GHAS-only jobs (CodeQL, dependency review, SARIF upload) **only where they exist** — public repos, or a private repo with Code Security plus repo variable `ENABLE_GHAS=true`. Always-on scanners run regardless. A private clone must never fail for lack of GHAS. See `docs/CLONING.md`.
+
 ### Tasks
 1. **CodeQL** (`javascript-typescript`) — free on public repos.
 2. **Dependency review** action on PRs; **Dependabot** alerts + updates.

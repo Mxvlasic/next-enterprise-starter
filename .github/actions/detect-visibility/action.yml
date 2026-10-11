@@ -1,0 +1,66 @@
+name: Detect repository visibility
+description: >-
+  Resolves the repository visibility (public/private/internal) so workflows can
+  enable GitHub Advanced Security features only where they are available, and
+  always run plan-independent scanners. Outputs `ghas=true` when the full
+  security suite may run (public repo, or a private repo with Code Security
+  enabled and ENABLE_GHAS=true).
+
+inputs:
+  force_ghas:
+    description: 'Set to "true" to treat the repo as GHAS-capable even when private.'
+    required: false
+    default: "false"
+
+outputs:
+  visibility:
+    description: One of public, private, internal.
+    value: ${{ steps.detect.outputs.visibility }}
+  is_public:
+    description: '"true" when the repository is public.'
+    value: ${{ steps.detect.outputs.is_public }}
+  is_private:
+    description: '"true" when the repository is private.'
+    value: ${{ steps.detect.outputs.is_private }}
+  ghas:
+    description: '"true" when GHAS-only features may run.'
+    value: ${{ steps.detect.outputs.ghas }}
+
+runs:
+  using: composite
+  steps:
+    - id: detect
+      shell: bash
+      env:
+        PAYLOAD_VISIBILITY: ${{ github.event.repository.visibility }}
+        FORCE_GHAS: ${{ inputs.force_ghas }}
+      run: |
+        set -euo pipefail
+
+        # Prefer the event payload; fall back to the API for events that omit
+        # the repository object (e.g. schedule).
+        visibility="${PAYLOAD_VISIBILITY:-}"
+        if [ -z "$visibility" ]; then
+          visibility="$(gh api "repos/${GITHUB_REPOSITORY}" --jq .visibility)"
+        fi
+
+        echo "visibility=$visibility" >> "$GITHUB_OUTPUT"
+
+        case "$visibility" in
+          public)   is_public=true;  is_private=false ;;
+          internal) is_public=false; is_private=false ;;
+          *)        is_public=false; is_private=true  ;;
+        esac
+        echo "is_public=$is_public"   >> "$GITHUB_OUTPUT"
+        echo "is_private=$is_private" >> "$GITHUB_OUTPUT"
+
+        # GHAS-gated features (code scanning/CodeQL, dependency review, SARIF
+        # upload, secret scanning) are free on public repos and require GitHub
+        # Code Security on private ones. Allow an explicit opt-in override.
+        if [ "$visibility" = "public" ] || [ "${FORCE_GHAS:-false}" = "true" ]; then
+          echo "ghas=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "ghas=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        echo "Repository visibility: $visibility (ghas=$([ "$visibility" = "public" ] || [ "${FORCE_GHAS:-false}" = "true" ] && echo true || echo false))"

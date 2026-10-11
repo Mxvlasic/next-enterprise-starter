@@ -3,6 +3,12 @@
 
 A production-ready template for building enterprise applications with Next.js. This boilerplate provides a solid foundation with carefully selected technologies and ready-to-go infrastructure to help you develop high-quality applications efficiently.
 
+> [!IMPORTANT]
+> **This repository is a template.** Generate a **public** or **private** repo from it and the CI **adapts automatically** (no edits needed to build in either). See:
+> - [`docs/CLONING.md`](docs/CLONING.md) — public vs private cloning, and how the pipeline adapts.
+> - [`docs/PLAN.md`](docs/PLAN.md) — the roadmap (containerize → deploy → CI/CD → security).
+> - [`docs/DEPLOYMENT-OPTIONS.md`](docs/DEPLOYMENT-OPTIONS.md) — deployment target assessment.
+
 ## Motivation
 
 While most Next.js boilerplates focus on individual developer needs with excessive complexity, **next-enterprise** prioritizes strategic simplicity for enterprise teams. It offers a streamlined foundation with high-impact features that maximize developer productivity and accelerate time-to-market for business-critical applications.
